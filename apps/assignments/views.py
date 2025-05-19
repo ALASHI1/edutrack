@@ -1,14 +1,15 @@
 from django.shortcuts import get_object_or_404
-from .models import Assignment, Submission
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import AssignmentSerializer, SubmissionSerializer, GradeSubmissionSerializer
-from permissions.is_teacher import IsTeacher
-from permissions.is_student import IsStudent
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import PermissionDenied
 
+from .models import Assignment, Submission
+from .serializers import AssignmentSerializer, SubmissionSerializer, GradeSubmissionSerializer
+from permissions.is_teacher import IsTeacher
+from permissions.is_student import IsStudent
+from utils.decorators import skip_if_swagger
 
 
 class CreateAssignmentView(generics.CreateAPIView):
@@ -21,7 +22,8 @@ class CreateAssignmentView(generics.CreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
-    
+
+    @skip_if_swagger(default_return=Assignment.objects.none())
     def get_queryset(self):
         return Assignment.objects.filter(course__teacher=self.request.user.teacherprofile)
 
@@ -30,7 +32,8 @@ class CreateAssignmentView(generics.CreateAPIView):
         if course.teacher != self.request.user.teacherprofile:
             raise PermissionDenied("You can only create assignments for your own courses.")
         serializer.save()
-        
+
+
 class UpdateAssignmentView(generics.UpdateAPIView):
     permission_classes = [IsTeacher]
     serializer_class = AssignmentSerializer
@@ -42,10 +45,11 @@ class UpdateAssignmentView(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Assignment.objects.none())
     def get_queryset(self):
         return Assignment.objects.filter(course__teacher=self.request.user.teacherprofile)
-    
-    
+
+
 class DeleteAssignmentView(generics.DestroyAPIView):
     permission_classes = [IsTeacher]
     serializer_class = AssignmentSerializer
@@ -57,9 +61,9 @@ class DeleteAssignmentView(generics.DestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Assignment.objects.none())
     def get_queryset(self):
         return Assignment.objects.filter(course__teacher=self.request.user.teacherprofile)
-   
 
 
 class TeacherAllAssignmentListView(generics.ListAPIView):
@@ -74,6 +78,7 @@ class TeacherAllAssignmentListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Assignment.objects.none())
     def get_queryset(self):
         course_id = self.kwargs['course_id']
         return Assignment.objects.filter(course__id=course_id)
@@ -82,7 +87,7 @@ class TeacherAllAssignmentListView(generics.ListAPIView):
 class TeacherAssignmentSubmissionUngraded(generics.ListAPIView):
     serializer_class = SubmissionSerializer
     permission_classes = [IsTeacher]
-    filterset_fields = ['assignment__course']   
+    filterset_fields = ['assignment__course']
 
     @swagger_auto_schema(
         operation_summary="List ungraded submissions",
@@ -91,6 +96,7 @@ class TeacherAssignmentSubmissionUngraded(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Submission.objects.none())
     def get_queryset(self):
         course_id = self.kwargs['course_id']
         return Submission.objects.filter(
@@ -103,7 +109,7 @@ class TeacherAssignmentSubmissionGraded(generics.ListAPIView):
     serializer_class = SubmissionSerializer
     permission_classes = [IsTeacher]
     filterset_fields = ['assignment__course']
-    
+
     @swagger_auto_schema(
         operation_summary="List graded submissions",
         operation_description="List all assignment submissions that have been reviewed for a given course."
@@ -111,6 +117,7 @@ class TeacherAssignmentSubmissionGraded(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Submission.objects.none())
     def get_queryset(self):
         course_id = self.kwargs['course_id']
         return Submission.objects.filter(
@@ -158,7 +165,6 @@ class StudentPendingAssignmentListView(generics.ListAPIView):
     serializer_class = AssignmentSerializer
     permission_classes = [IsStudent]
     filterset_fields = ['course']
-    
 
     @swagger_auto_schema(
         operation_summary="List pending assignments (by course)",
@@ -167,6 +173,7 @@ class StudentPendingAssignmentListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Assignment.objects.none())
     def get_queryset(self):
         course_id = self.kwargs['course_id']
         course_assignments = Assignment.objects.filter(course_id=course_id, course__students=self.request.user.studentprofile)
@@ -189,6 +196,7 @@ class StudentAllPendingAssignmentListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Assignment.objects.none())
     def get_queryset(self):
         course_assignments = Assignment.objects.filter(course__students=self.request.user.studentprofile)
         submitted_assignments = Submission.objects.filter(
@@ -209,6 +217,7 @@ class StudentSubmittedAssignmentListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Submission.objects.none())
     def get_queryset(self):
         course_id = self.kwargs['course_id']
         return Submission.objects.filter(

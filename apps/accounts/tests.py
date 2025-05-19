@@ -69,13 +69,3 @@ class ProfileViewTests(APITestCase):
     def test_unauthenticated_access_fails(self):
         response = self.client.get(self.student_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-#Course registration
-
-#  Assignment submission
-
-#  Grade assignment
-
-#  List own profile
-
-#  Prevent duplicate submissions

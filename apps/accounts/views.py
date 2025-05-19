@@ -1,12 +1,13 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from .models import TeacherProfile, StudentProfile
 from .serializers import TeacherProfileSerializer, StudentProfileSerializer
+from utils.decorators import skip_if_swagger
+
 
 class UpdateTeacherProfileView(generics.UpdateAPIView):
     queryset = TeacherProfile.objects.all()
@@ -19,6 +20,7 @@ class UpdateTeacherProfileView(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=TeacherProfile())
     def get_object(self):
         return get_object_or_404(TeacherProfile, user=self.request.user)
 
@@ -46,8 +48,10 @@ class TeacherProfileDetailView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=TeacherProfile())
     def get_object(self):
         return get_object_or_404(TeacherProfile, user=self.request.user)
+
 
 class UpdateStudentProfileView(generics.UpdateAPIView):
     queryset = StudentProfile.objects.all()
@@ -60,6 +64,7 @@ class UpdateStudentProfileView(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=StudentProfile())
     def get_object(self):
         return get_object_or_404(StudentProfile, user=self.request.user)
 
@@ -87,5 +92,6 @@ class StudentProfileDetailView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=StudentProfile())
     def get_object(self):
         return get_object_or_404(StudentProfile, user=self.request.user)

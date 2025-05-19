@@ -1,14 +1,13 @@
 from django.shortcuts import render
 from .models import Course
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import CourseSerializer, CourseRegistrationSerializer
 from permissions.is_teacher import IsTeacher
 from permissions.is_student import IsStudent
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
-
+from utils.decorators import skip_if_swagger
 
 
 class CreateCourseView(generics.CreateAPIView):
@@ -38,9 +37,11 @@ class CourseUpdateView(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Course.objects.none())
     def get_queryset(self):
         return Course.objects.filter(teacher=self.request.user.teacherprofile)
-    
+
+
 class CourseDeleteView(generics.DestroyAPIView):
     permission_classes = [IsTeacher]
     serializer_class = CourseSerializer
@@ -52,6 +53,7 @@ class CourseDeleteView(generics.DestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Course.objects.none())
     def get_queryset(self):
         return Course.objects.filter(teacher=self.request.user.teacherprofile)
 
@@ -78,6 +80,7 @@ class CourseDetailView(generics.RetrieveAPIView):
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
 
 class StudentCourseRegisterView(APIView):
     permission_classes = [IsStudent]
@@ -144,7 +147,6 @@ class StudentCourseListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @skip_if_swagger(default_return=Course.objects.none())
     def get_queryset(self):
         return Course.objects.filter(students=self.request.user.studentprofile)
-
-
