@@ -62,4 +62,3 @@ jobs:
 
       - name: Run tests
         run: python manage.py test apps/accounts apps/assignments apps/courses
-g
