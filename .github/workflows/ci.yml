@@ -14,13 +14,13 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: edutrack
+          POSTGRES_USER: edutrack
+          POSTGRES_PASSWORD: edutrack
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U ${{ secrets.DB_USER }}"
+          --health-cmd="pg_isready -U edutrack"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -28,37 +28,38 @@ jobs:
     env:
       DEBUG: false
       SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: edutrack
+      DB_USER: edutrack
+      DB_PASSWORD: edutrack
       DB_HOST: localhost
       DB_PORT: 5432
       ALLOWED_HOSTS: 127.0.0.1,localhost
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Wait for Postgres to be ready
-      run: |
-        for i in {1..10}; do
-          pg_isready -h localhost -p 5432 -U $DB_USER && break
-          echo "Waiting for PostgreSQL..."
-          sleep 2
-        done
+      - name: Wait for Postgres to be ready
+        run: |
+          for i in {1..10}; do
+            pg_isready -h localhost -p 5432 -U $DB_USER && break
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
 
-    - name: Run migrations
-      run: python manage.py migrate
+      - name: Run migrations
+        run: python manage.py migrate
 
-    - name: Run tests
-      run: python manage.py test apps/accounts apps/assignments apps/courses
+      - name: Run tests
+        run: python manage.py test apps/accounts apps/assignments apps/courses
+g
