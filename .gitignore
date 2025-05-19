@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+env/
+.venv/
+*.sqlite3
+
+# Django
+*.log
+staticfiles/
+media/
+
+# Secrets & Environment
+.env*
+!.env.example
+secrets.json
+*.local
+.env
+.env.dev
+.env.prod
+# VS Code / IDEs
+.vscode/
+.idea/
+*.swp
+
+# Docker
+*.pid
+*.db
+docker-compose.override.yml
+
+# Coverage & Testing
+htmlcov/
+coverage.xml
+.pytest_cache/
+.tox/
+nosetests.xml
+test-results.xml
+
+# GitHub Actions
+.github/workflows/*.bak
+.github/workflows/*.disabled
+
+# Act (for local GitHub Actions testing)
+.act/
+.secrets
